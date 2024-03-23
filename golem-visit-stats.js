@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         MH - Golem Visit Stats
-// @version      2.0.1
+// @version      2.0.3
 // @description  Shows golem visit numbers without having to bell your golem or have an idle one. Also adds a small tooltip in the aura to inform you of the hours left until max aura and the number of golems / hats needed for it.
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
 // @match        https://www.mousehuntgame.com/*
 // @icon         https://www.mousehuntgame.com/images/items/stats/large/680f6a68612ca9181a90b5719b20ef78.png
-// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.1/scripts/utils.js
+// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.3/scripts/utils.js
+// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.3/scripts/statics.js
 // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.10.5/mousehunt-utils.js
 // @license      MIT
 // ==/UserScript==
@@ -27,23 +28,6 @@
 
     // #region Variables
     let isDebug = false;
-
-    // #region Months Map
-    const monthMap = new Map();
-
-    monthMap.set("January", 1);
-    monthMap.set("February", 2);
-    monthMap.set("March", 3);
-    monthMap.set("April", 4);
-    monthMap.set("May", 5);
-    monthMap.set("June", 6);
-    monthMap.set("July", 7);
-    monthMap.set("August", 8);
-    monthMap.set("September", 9);
-    monthMap.set("October", 10);
-    monthMap.set("November", 11);
-    monthMap.set("December", 12);
-    // #endregion
 
     const localStorageKey = `mh-golem-visit-stats`;
 
@@ -281,44 +265,7 @@
 
         // Final Append
         document.body.appendChild(golemStatsPopup);
-        dragElement(golemStatsPopup, golemStatsDiv);
-    }
-
-    function dragElement(elmnt, dragEl) {
-        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        dragEl.onmousedown = dragMouseDown;
-
-        function dragMouseDown(e) {
-            e = e || window.event;
-            e.preventDefault();
-            // get the mouse cursor position at startup:
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            document.onmouseup = closeDragElement;
-            // call a function whenever the cursor moves:
-            document.onmousemove = elementDrag;
-        }
-
-        function elementDrag(e) {
-            e = e || window.event;
-            e.preventDefault();
-
-            // calculate the new cursor position:
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-
-            // set the element's new position:
-            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-        }
-
-        function closeDragElement() {
-            // stop moving when mouse button is released:
-            document.onmouseup = null;
-            document.onmousemove = null;
-        }
+        hd_utils.dragElement(golemStatsPopup, golemStatsDiv);
     }
     // #endregion
 
@@ -389,7 +336,7 @@
                 hours = 12 + parseInt(hours);
             }
 
-            const parsedDate = new Date(`${currentAuraDateSplit[2]}/${monthMap.get(currentAuraDateSplit[0])}/${currentAuraDateSplit[1].replace(',', '')} ${hours}:${minutes} UTC`);
+            const parsedDate = new Date(`${currentAuraDateSplit[2]}/${hd_statics.monthMap.get(currentAuraDateSplit[0])}/${currentAuraDateSplit[1].replace(',', '')} ${hours}:${minutes} UTC`);
             parsedDate.setMinutes(parsedDate.getMinutes() + timezoneOffset);
 
             const parsedDateTimestamp = parsedDate.getTime();
@@ -411,7 +358,7 @@
             endAuraTextSplit = endAuraTextSplit.replace(')', '');
             let endAuraDateTextSplit = endAuraTextSplit.trim().split(' ');
 
-            const parsedEndDate = new Date(`${endAuraDateTextSplit[2]}/${monthMap.get(endAuraDateTextSplit[0])}/${endAuraDateTextSplit[1]} ${endAuraDateTextSplit[3]} ${endAuraDateTextSplit[4]}`).getTime();
+            const parsedEndDate = new Date(`${endAuraDateTextSplit[2]}/${hd_statics.monthMap.get(endAuraDateTextSplit[0])}/${endAuraDateTextSplit[1]} ${endAuraDateTextSplit[3]} ${endAuraDateTextSplit[4]}`).getTime();
 
             if (isDebug) {
                 console.log(`EndAuraTextSplit= ${endAuraTextSplit}`);

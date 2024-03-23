@@ -1,3 +1,8 @@
+__Golem Visit Stats__
+
+v2.0.3
+- Extracted some extra code to be added to external libraries
+
 v2.0.1
 - Rehauled the script to use external resources (scripts/stylesheets/json)
 
