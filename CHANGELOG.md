@@ -1,3 +1,9 @@
+__Journal Log Tracker__
+
+v0.1
+- Initial version of the script. Timer & button to view log list, and ability to view each of the past logs.
+
+
 __Golem Visit Stats__
 
 v2.0.3
