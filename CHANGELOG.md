@@ -1,5 +1,9 @@
 __Journal Log Tracker__
 
+v0.2
+- Fixed possible issue from scraping other players' journals
+- Changed "Ready!" to showing how much time has passed since expected log time to appear
+
 v0.1
 - Initial version of the script. Timer & button to view log list, and ability to view each of the past logs.
 

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.1
+// @version      0.2
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -47,7 +47,7 @@
     });
 
     function activateMutationObserver() {
-        let observerTarget = document.querySelector(`#journalContainer .content`);
+        let observerTarget = document.querySelector(`#journalEntries${user.user_id}`);
 
         if (observerTarget !== null && observerTarget !== undefined) {
             observer.observe(observerTarget, {
@@ -103,13 +103,7 @@
 
     // #region Journal Scraping Methods
     function tryToScrapeJournal() {
-        const ownJournal = document.querySelector(`#journalEntries${user.user_id}`);
-
-        if (!ownJournal) {
-            if (isDebug) {
-                console.log(`Other hunters' profile detected`);
-            }
-
+        if (!isOwnJournal()) {
             return;
         }
 
@@ -204,6 +198,10 @@
     // #endregion
 
     function showButton() {
+        if (!isOwnJournal()) {
+            return;
+        }
+
         const target = document.querySelector("#journalContainer .top");
         if (target) {
             const link = document.createElement("a");
@@ -236,8 +234,16 @@
         journalLogs.appendChild(title);
 
         // Subtitle
+        let nextLogDateString = "N/A";
+        if (storedData.lastSavedEntryId !== undefined && storedData.logs[storedData.lastSavedEntryId] !== undefined) {
+            const logDate = new Date(storedData.logs[storedData.lastSavedEntryId].Timestamp);
+            logDate.setHours(logDate.getHours() + 36);
+            
+            nextLogDateString = `${logDate.toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} - (${getNextLogTimer()})`;
+        }
+
         const subtitle = document.createElement("h4");
-        subtitle.innerText = `Next Log: ${getNextLogTimer()}`;
+        subtitle.innerText = `Estimated Log Date: ${nextLogDateString}`;
         journalLogs.appendChild(subtitle);
 
         const spacing = document.createElement("br");
@@ -276,7 +282,7 @@
                 } else if (i == 1) {
                     // Link element
                     const link = document.createElement("a");
-                    link.innerText = new Date(storedData.logs[logId][keys[i]]).toLocaleString();
+                    link.innerText = new Date(storedData.logs[logId][keys[i]]).toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                     link.href = "#";
                     link.addEventListener("click", function () {
                         document.querySelector("#journal-logs-popup-div").remove();
@@ -327,21 +333,50 @@
             const lastLogDate = new Date(storedData.logs[storedData.lastSavedEntryId].Timestamp);
 
             const nextLogTimestamp = lastLogDate.setHours(lastLogDate.getHours() + 36);
-            const timestampDifference = nextLogTimestamp - Date.now();
+            const timestampDifference = Math.abs(nextLogTimestamp - Date.now());
+            const hasPassed = nextLogTimestamp < Date.now();
 
-            if (timestampDifference < 0) {
-                timerString = "Ready!";
-            } else {
-                const hours = Math.floor(timestampDifference / 1000 / 60 / 60);
-                const minutes = Math.round((timestampDifference - (hours * 1000 * 60 * 60)) / 1000 / 60);
-                if (hours > 0) {
-                    timerString = `${hours}h ${minutes}m`
-                } else {
-                    timerString = `${minutes}m`;
-                }
+            let hours = Math.floor(timestampDifference / 1000 / 60 / 60);
+            let minutes = Math.round((timestampDifference - (hours * 1000 * 60 * 60)) / 1000 / 60);
+
+            if (minutes === 60) {
+                minutes = 0;
+                hours += 1;
+            }
+
+            timerString = "";
+
+            if (hours > 0) {
+                timerString = `${hours}h`;
+            }
+
+            if (minutes > 0) {
+                timerString += `${hours > 0 ? " " : ""}${minutes}m`;
+            }
+
+            if (hasPassed) {
+                timerString += " ago";
+            }
+
+            if (hours == 0 && minutes == 0) {
+                timerString = "Almost ready!"
             }
         }
 
         return timerString;
+    }
+
+    function isOwnJournal() {
+        const ownJournal = document.querySelector(`#journalEntries${user.user_id}`);
+
+        if (!ownJournal) {
+            if (isDebug) {
+                console.log(`Other hunters' profile detected`);
+            }
+
+            return false;
+        }
+
+        return true;
     }
 })();
