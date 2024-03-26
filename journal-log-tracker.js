@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.2
+// @version      0.3
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -147,7 +147,6 @@
 
     function extractInfoFromEntry(entry) {
         const entryInfo = {};
-        entryInfo.Entry = entry;
 
         const splitStringDate = entry.querySelector(".journaldate").innerHTML.split("-")[0].trim().split(" ");
 
@@ -184,8 +183,6 @@
                 entryInfo.Ftc = Number.parseInt(tdElements[i].nextSibling.innerHTML);
             } else if (tdElements[i].innerHTML.includes("Fail to Attract:")) {
                 entryInfo.Fta = Number.parseInt(tdElements[i].nextSibling.innerHTML);
-            } else if (tdElements[i].innerHTML.includes("Stale Bait:")) {
-                entryInfo.StaleBait = Number.parseInt(tdElements[i].nextSibling.innerHTML);
             }
         }
 
@@ -243,7 +240,7 @@
         }
 
         const subtitle = document.createElement("h4");
-        subtitle.innerText = `Estimated Log Date: ${nextLogDateString}`;
+        subtitle.innerText = `Next Estimated Log: ${nextLogDateString}`;
         journalLogs.appendChild(subtitle);
 
         const spacing = document.createElement("br");
@@ -254,8 +251,8 @@
         journalLogsTable.id = "journal-logs-table"
         journalLogsTable.classList.add("hd-table");
 
-        const headings = ["#", "Date & Time", "Duration", "Catches", "FTC", "FTA", "Stale Bait"];
-        const keys = ["", "Timestamp", "Duration", "Catches", "Ftc", "Fta", "StaleBait"];
+        const headings = ["#", "Date & Time", "Duration", "Catches", "FTC", "FTA"];
+        const keys = ["", "Timestamp", "Duration", "Catches", "Ftc", "Fta"];
 
         // Create headings
         for (let i = 0; i < headings.length; ++i) {
@@ -278,7 +275,7 @@
             for (let i = 0; i < headings.length; ++i) {
                 const tdElement = document.createElement("td");
                 if (i == 0) {
-                    tdElement.innerText = i + 1;
+                    tdElement.innerText = j + 1;
                 } else if (i == 1) {
                     // Link element
                     const link = document.createElement("a");
