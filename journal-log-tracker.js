@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.3
+// @version      0.4
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -158,7 +158,7 @@
             date.setHours(splitStringDate[0].split(":")[0]);
             date.setMinutes(splitStringDate[0].split(":")[1]);
 
-            if (splitStringDate[1] === "pm") {
+            if (date.getHours() !== 12 && splitStringDate[1] === "pm") {
                 date.setHours(date.getHours() + 12);
             }
 
