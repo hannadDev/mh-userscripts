@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.5
+// @version      0.6
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -47,7 +47,7 @@
     });
 
     function activateMutationObserver() {
-        let observerTarget = document.querySelector(`#journalEntries${user.user_id}`);
+        let observerTarget = document.querySelector(`#journalContainer[data-owner="${user.user_id}"] .content`);
 
         if (observerTarget !== null && observerTarget !== undefined) {
             observer.observe(observerTarget, {
@@ -142,6 +142,7 @@
 
         if (addedNewEntries) {
             setData(storedData);
+            showButton();
         }
     }
 
@@ -201,6 +202,11 @@
             return;
         }
 
+        const olderButton = document.querySelector("#journal-log-button");
+        if(olderButton) {
+            olderButton.remove();
+        }
+
         const target = document.querySelector("#journalContainer .top");
         if (target) {
             const link = document.createElement("a");
@@ -237,7 +243,7 @@
         if (storedData.lastSavedEntryId !== undefined && storedData.logs[storedData.lastSavedEntryId] !== undefined) {
             const logDate = new Date(storedData.logs[storedData.lastSavedEntryId].Timestamp);
             logDate.setHours(logDate.getHours() + 36);
-            
+
             nextLogDateString = `${logDate.toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} - (${getNextLogTimer()})`;
         }
 
@@ -245,8 +251,7 @@
         subtitle.innerText = `Next Estimated Log: ${nextLogDateString}`;
         journalLogs.appendChild(subtitle);
 
-        const spacing = document.createElement("br");
-        journalLogs.appendChild(spacing);
+        journalLogs.appendChild(document.createElement("br"));
 
         // Table for journal logs
         const journalLogsTable = document.createElement("table");
@@ -366,7 +371,7 @@
     }
 
     function isOwnJournal() {
-        const ownJournal = document.querySelector(`#journalEntries${user.user_id}`);
+        const ownJournal = document.querySelector(`#journalContainer[data-owner="${user.user_id}"] .content`);
 
         if (!ownJournal) {
             if (isDebug) {

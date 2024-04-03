@@ -1,5 +1,19 @@
 __Journal Log Tracker__
 
+v0.6
+- Fixed issue that prevented scraping properly
+
+v0.5
+- Fixed another issue in scraping dates but this time around 12am
+
+v0.4
+- Fixed issue with calculating date if 12 pm
+
+v0.3
+- Removed StaleBait and Entry from being saved in the object
+- Fixed log # from being all 1s
+- Fixed subtitle text
+
 v0.2
 - Fixed possible issue from scraping other players' journals
 - Changed "Ready!" to showing how much time has passed since expected log time to appear
