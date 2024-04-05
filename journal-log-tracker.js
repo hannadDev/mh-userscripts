@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.6
+// @version      0.7
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -312,6 +312,22 @@
         // Final append
         journalLogsTable.appendChild(tableBody)
         journalLogs.appendChild(journalLogsTable);
+        
+        // Manual fetch link. Remove to other tab later
+        journalLogs.appendChild(document.createElement("br"));
+
+        const link = document.createElement("a");
+        link.innerText = "Manual Fetch";
+        link.href = "#";
+        link.classList.add("hd-button");
+        link.addEventListener("click", function () {
+            tryToScrapeJournal();
+            showLogs();
+            return false;
+        });
+
+        journalLogs.appendChild(link);
+
         journalLogsPopup.appendChild(journalLogs);
 
         // Close button
