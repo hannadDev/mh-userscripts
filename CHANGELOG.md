@@ -1,5 +1,14 @@
 __Journal Log Tracker__
 
+v0.9
+- Added confirmation to log deletion
+
+v0.8
+- Added button to delete logs
+
+v0.7
+- Added manual fetch button
+
 v0.6
 - Fixed issue that prevented scraping properly
 

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.7
+// @version      0.9
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -98,6 +98,19 @@
 
     function setData(stats) {
         localStorage.setItem(localStorageKey, JSON.stringify(stats));
+    }
+
+    function deleteLog(logId) {
+        delete storedData.logs[logId];
+        if (storedData.lastSavedEntryId === logId) {
+            const keys = Object.keys(storedData.logs);
+
+            if (keys.length > 0) {
+                storedData.lastSavedEntryId = keys[keys.length - 1];
+            } else {
+                storedData.lastSavedEntryId = -1;
+            }
+        }
     }
     // #endregion
 
@@ -203,7 +216,7 @@
         }
 
         const olderButton = document.querySelector("#journal-log-button");
-        if(olderButton) {
+        if (olderButton) {
             olderButton.remove();
         }
 
@@ -222,7 +235,7 @@
         }
     }
 
-    function showLogs() {
+    function showLogs(enableDeleteLogs = false) {
         document.querySelectorAll("#journal-logs-popup-div").forEach(el => el.remove());
 
         const journalLogsPopup = document.createElement("div");
@@ -258,11 +271,15 @@
         journalLogsTable.id = "journal-logs-table"
         journalLogsTable.classList.add("hd-table");
 
-        const headings = ["#", "Date & Time", "Duration", "Catches", "FTC", "FTA"];
+        const headings = ["#", "Date & Time", "Duration", "Catches", "FTC", "FTA", "#"];
         const keys = ["", "Timestamp", "Duration", "Catches", "Ftc", "Fta"];
 
         // Create headings
         for (let i = 0; i < headings.length; ++i) {
+            if (!enableDeleteLogs && i == headings.length - 1) {
+                continue;
+            }
+
             const headingElement = document.createElement("th");
             headingElement.id = `journal-logs-${headings[i].toLowerCase()}-heading`;
             headingElement.innerText = headings[i];
@@ -280,6 +297,10 @@
             tableRow.id = "journal-logs-table-row-" + j
 
             for (let i = 0; i < headings.length; ++i) {
+                if (!enableDeleteLogs && i == headings.length - 1) {
+                    continue;
+                }
+
                 const tdElement = document.createElement("td");
                 if (i == 0) {
                     tdElement.innerText = j + 1;
@@ -291,6 +312,18 @@
                     link.addEventListener("click", function () {
                         document.querySelector("#journal-logs-popup-div").remove();
                         eval(storedData.logs[logId]["OpenSummaryMethod"]);
+                        return false;
+                    });
+
+                    tdElement.append(link);
+                } else if (i == headings.length - 1) {
+                    // Delete Log element
+                    const link = document.createElement("a");
+                    link.innerText = "X";
+                    link.href = "#";
+                    link.addEventListener("click", function () {
+                        deleteLog(logId);
+                        showLogs(true);
                         return false;
                     });
 
@@ -312,21 +345,61 @@
         // Final append
         journalLogsTable.appendChild(tableBody)
         journalLogs.appendChild(journalLogsTable);
-        
+
         // Manual fetch link. Remove to other tab later
         journalLogs.appendChild(document.createElement("br"));
-
-        const link = document.createElement("a");
-        link.innerText = "Manual Fetch";
-        link.href = "#";
-        link.classList.add("hd-button");
-        link.addEventListener("click", function () {
+        const manualFetchLink = document.createElement("a");
+        manualFetchLink.innerText = "Manual Fetch";
+        manualFetchLink.href = "#";
+        manualFetchLink.classList.add("hd-button");
+        manualFetchLink.addEventListener("click", function () {
             tryToScrapeJournal();
             showLogs();
             return false;
         });
 
-        journalLogs.appendChild(link);
+        journalLogs.appendChild(manualFetchLink);
+
+        // Toggle Log Deletion. Remove to other tab later
+        journalLogs.appendChild(document.createElement("br"));
+        journalLogs.appendChild(document.createElement("br"));
+        if (enableDeleteLogs) {
+            const confirmDeleteLogsLink = document.createElement("a");
+            confirmDeleteLogsLink.innerText = "Confirm Deletion";
+            confirmDeleteLogsLink.href = "#";
+            confirmDeleteLogsLink.classList.add("hd-button");
+            confirmDeleteLogsLink.addEventListener("click", function () {
+                setData(storedData);
+                showLogs(!enableDeleteLogs);
+                return false;
+            });
+
+            journalLogs.appendChild(confirmDeleteLogsLink);
+
+            const discardDeleteLogsLink = document.createElement("a");
+            discardDeleteLogsLink.innerText = "Discard Deletion";
+            discardDeleteLogsLink.href = "#";
+            discardDeleteLogsLink.classList.add("hd-button");
+            discardDeleteLogsLink.addEventListener("click", function () {
+                storedData = getStoredData();
+                showLogs(!enableDeleteLogs);
+                return false;
+            });
+
+            journalLogs.appendChild(discardDeleteLogsLink);
+
+        } else {
+            const toggleDeleteLogsLink = document.createElement("a");
+            toggleDeleteLogsLink.innerText = "Toggle Delete Logs";
+            toggleDeleteLogsLink.href = "#";
+            toggleDeleteLogsLink.classList.add("hd-button");
+            toggleDeleteLogsLink.addEventListener("click", function () {
+                showLogs(!enableDeleteLogs);
+                return false;
+            });
+
+            journalLogs.appendChild(toggleDeleteLogsLink);
+        }
 
         journalLogsPopup.appendChild(journalLogs);
 
