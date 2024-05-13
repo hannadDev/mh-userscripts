@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      0.9
+// @version      1.0
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
 // @match        https://www.mousehuntgame.com/*
 // @icon         https://www.mousehuntgame.com/images/ui/journal/themes/classic_thumb.gif
-// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.4/scripts/utils.js
+// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.7/scripts/utils.js
 // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.10.5/mousehunt-utils.js
 // @license      MIT
 // ==/UserScript==
@@ -18,13 +18,14 @@
     let isDebug = false;
 
     const localStorageKey = `mh-journal-log-tracker`;
+    const PAGE_SIZE = 10;
 
     let storedData = {};
     //#endregion
 
     //#region Loading external assets
-    const mainStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.4/stylesheets/main.css";
-    const scriptSpecificStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.4/stylesheets/journal-log-tracker.css";
+    const mainStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.7/stylesheets/main.css";
+    const scriptSpecificStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.7/stylesheets/journal-log-tracker.css";
 
     hd_utils.addStyleElement(mainStylesheetUrl);
     hd_utils.addStyleElement(scriptSpecificStylesheetUrl);
@@ -116,7 +117,7 @@
 
     // #region Journal Scraping Methods
     function tryToScrapeJournal() {
-        if (!isOwnJournal()) {
+        if (!hd_utils.mh.isOwnJournal()) {
             return;
         }
 
@@ -210,8 +211,9 @@
     }
     // #endregion
 
+    // #region UI
     function showButton() {
-        if (!isOwnJournal()) {
+        if (!hd_utils.mh.isOwnJournal()) {
             return;
         }
 
@@ -235,7 +237,7 @@
         }
     }
 
-    function showLogs(enableDeleteLogs = false) {
+    function showLogs(page = 1, enableDeleteLogs = false) {
         document.querySelectorAll("#journal-logs-popup-div").forEach(el => el.remove());
 
         const journalLogsPopup = document.createElement("div");
@@ -291,8 +293,20 @@
         // Table Body
         const tableBody = document.createElement("tbody");
 
-        let j = 0
-        for (const logId in storedData.logs) {
+        const logIDs = Object.keys(storedData.logs);
+        logIDs.sort((a, b) => b - a);
+
+        let j = 0;
+        for (const logId of logIDs) {
+            if (j < PAGE_SIZE * (page - 1)) {
+                ++j;
+                continue;
+            }
+
+            if (j >= PAGE_SIZE * page) {
+                break;
+            }
+
             const tableRow = document.createElement("tr");
             tableRow.id = "journal-logs-table-row-" + j
 
@@ -323,7 +337,8 @@
                     link.href = "#";
                     link.addEventListener("click", function () {
                         deleteLog(logId);
-                        showLogs(true);
+                        const pagesCount = Math.ceil(Object.keys(storedData.logs).length / PAGE_SIZE);
+                        showLogs(page > pagesCount ? pagesCount : page, true);
                         return false;
                     });
 
@@ -345,6 +360,46 @@
         // Final append
         journalLogsTable.appendChild(tableBody)
         journalLogs.appendChild(journalLogsTable);
+
+        // Pagination links
+        journalLogs.appendChild(document.createElement("br"));
+        const pagesCount = Math.ceil(Object.keys(storedData.logs).length / PAGE_SIZE);
+
+        const paginationDiv = document.createElement("div");
+        const previousPageLink = document.createElement("a");
+        previousPageLink.innerText = "< Prev";
+        previousPageLink.classList.add("hd-mx-2");
+        paginationDiv.appendChild(previousPageLink);
+
+        if (page > 1) {
+            previousPageLink.href = "#";
+
+            previousPageLink.addEventListener("click", function () {
+                showLogs(page - 1, enableDeleteLogs);
+                return false;
+            });
+        }
+
+        const currentPageText = document.createElement("span");
+        currentPageText.innerText = page;
+        currentPageText.classList.add("hd-mx-2");
+        paginationDiv.appendChild(currentPageText);
+
+        const nextPageLink = document.createElement("a");
+        nextPageLink.innerText = "Next >";
+        nextPageLink.classList.add("hd-mx-2");
+        paginationDiv.appendChild(nextPageLink);
+        
+        if (page < pagesCount) {
+            nextPageLink.href = "#";
+            nextPageLink.addEventListener("click", function () {
+                showLogs(page + 1, enableDeleteLogs);
+                return false;
+            });
+
+        }
+
+        journalLogs.appendChild(paginationDiv);
 
         // Manual fetch link. Remove to other tab later
         journalLogs.appendChild(document.createElement("br"));
@@ -370,7 +425,7 @@
             confirmDeleteLogsLink.classList.add("hd-button");
             confirmDeleteLogsLink.addEventListener("click", function () {
                 setData(storedData);
-                showLogs(!enableDeleteLogs);
+                showLogs(1, !enableDeleteLogs);
                 return false;
             });
 
@@ -382,7 +437,7 @@
             discardDeleteLogsLink.classList.add("hd-button");
             discardDeleteLogsLink.addEventListener("click", function () {
                 storedData = getStoredData();
-                showLogs(!enableDeleteLogs);
+                showLogs(1, !enableDeleteLogs);
                 return false;
             });
 
@@ -394,7 +449,7 @@
             toggleDeleteLogsLink.href = "#";
             toggleDeleteLogsLink.classList.add("hd-button");
             toggleDeleteLogsLink.addEventListener("click", function () {
-                showLogs(!enableDeleteLogs);
+                showLogs(page, !enableDeleteLogs);
                 return false;
             });
 
@@ -419,7 +474,9 @@
         document.body.appendChild(journalLogsPopup);
         hd_utils.dragElement(journalLogsPopup, journalLogs);
     }
+    // #endregion
 
+    // #region Utils
     function getNextLogTimer() {
         let timerString = "N/A";
         if (storedData.lastSavedEntryId !== undefined && storedData.logs[storedData.lastSavedEntryId] !== undefined) {
@@ -458,18 +515,5 @@
 
         return timerString;
     }
-
-    function isOwnJournal() {
-        const ownJournal = document.querySelector(`#journalContainer[data-owner="${user.user_id}"] .content`);
-
-        if (!ownJournal) {
-            if (isDebug) {
-                console.log(`Other hunters' profile detected`);
-            }
-
-            return false;
-        }
-
-        return true;
-    }
+    // #endregion
 })();
