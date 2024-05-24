@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.0
+// @version      1.1
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -381,7 +381,7 @@
         }
 
         const currentPageText = document.createElement("span");
-        currentPageText.innerText = page;
+        currentPageText.innerText = `${page} of ${pagesCount}`;
         currentPageText.classList.add("hd-mx-2");
         paginationDiv.appendChild(currentPageText);
 
