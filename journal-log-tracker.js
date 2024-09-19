@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.2
+// @version      1.2.1
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -103,14 +103,14 @@
 
     function deleteLog(logId) {
         delete storedData.logs[logId];
-        if (storedData.lastSavedEntryId === logId) {
+        if (Number.parseInt(storedData.lastSavedEntryId) === Number.parseInt(logId)) {
             const keys = Object.keys(storedData.logs);
 
             storedData.lastSavedEntryId = -1;
             if (keys.length > 0) {
                 for (let k = 0; k < keys.length; k++) {
-                    if (storedData.lastSavedEntryId < Number.parseInt(keys[i])) {
-                        storedData.lastSavedEntryId = Number.parseInt(keys[i]);
+                    if (storedData.lastSavedEntryId < Number.parseInt(keys[k])) {
+                        storedData.lastSavedEntryId = Number.parseInt(keys[k]);
                     }
                 }
             }

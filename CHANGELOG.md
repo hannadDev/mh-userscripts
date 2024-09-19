@@ -1,5 +1,8 @@
 __Journal Log Tracker__
 
+v1.2.1
+- Fixed a small issue in log deletion caused by previous push
+
 v1.2
 - Fixed an issue with entryId being a string causing issues when comparing and setting lastSavedEntryId
 - Added Gold/Points scraping from entry
