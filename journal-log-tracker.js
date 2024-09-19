@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.2.1
+// @version      1.2.2
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -32,9 +32,9 @@
     //#endregion
 
     //#region Initialization
-    const observer = new MutationObserver(function (mutations) {
+    const journalContainerObserver = new MutationObserver(function (mutations) {
         if (isDebug) {
-            console.log('Mutated');
+            console.log('[Journal Container Observer] Mutation');
             for (const mutation of mutations) {
                 console.log({ mutation });
                 console.log(mutation.target);
@@ -47,13 +47,40 @@
         }
     });
 
-    function activateMutationObserver() {
-        let observerTarget = document.querySelector(`#journalContainer[data-owner="${user.user_id}"] .content`);
+    const mousehuntContainerObserver = new MutationObserver(function (mutations) {
+        if (isDebug) {
+            console.log('[Mousehunt Container Observer] Mutation');
+            for (const mutation of mutations) {
+                console.log({ mutation });
+                console.log(mutation.target);
+            }
+        }
 
-        if (observerTarget !== null && observerTarget !== undefined) {
-            observer.observe(observerTarget, {
+        // Check if camp or journal pages
+        const mhContainer = document.getElementById('mousehuntContainer');
+        if (mhContainer && mhContainer.classList && (mhContainer.classList.contains('PageCamp') || mhContainer.classList.contains('PageJournal'))) {
+            showButton();
+        }
+    });
+
+    function activateJournalMutationObserver() {
+        let journalContainerObserverTarget = document.querySelector(`#journalContainer[data-owner="${user.user_id}"] .content`);
+
+        if (journalContainerObserverTarget) {
+            journalContainerObserver.observe(journalContainerObserverTarget, {
                 childList: true,
                 subtree: true
+            });
+        }
+    }
+
+    function activateMousehuntContainerMutationObserver() {
+        let mousehuntContainerObserverTarget = document.getElementById('mousehuntContainer');
+
+        if (mousehuntContainerObserverTarget) {
+            mousehuntContainerObserver.observe(mousehuntContainerObserverTarget, {
+                attributes: true,
+                attributeFilter: ['class']
             });
         }
     }
@@ -63,21 +90,11 @@
 
         storedData = getStoredData();
 
-        activateMutationObserver();
+        activateMousehuntContainerMutationObserver();
+        activateJournalMutationObserver();
         showButton();
 
-        // #region Listeners
-        onPageChange({
-            camp: {
-                show: () => {
-                    showButton();
-                    activateMutationObserver();
-                }
-            }
-        });
-
         onRequest(() => { tryToScrapeJournal(); }, 'managers/ajax/turns/activeturn.php');
-        //#endregion
     }
 
     Initialize();

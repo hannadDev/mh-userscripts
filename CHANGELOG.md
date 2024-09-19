@@ -1,5 +1,8 @@
 __Journal Log Tracker__
 
+v1.2.2
+- Fixed script to work properly on Journal.php page as well (removed onPageChange and used MutationObserver instead)
+
 v1.2.1
 - Fixed a small issue in log deletion caused by previous push
 
