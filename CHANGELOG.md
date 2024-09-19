@@ -1,5 +1,17 @@
 __Journal Log Tracker__
 
+v1.2
+- Fixed an issue with entryId being a string causing issues when comparing and setting lastSavedEntryId
+- Added Gold/Points scraping from entry
+- Added First/Last buttons to pagination
+
+v1.1
+- Added pages count to pagination
+
+v1.0
+- Added Pagination
+- Sorted in descending order
+
 v0.9
 - Added confirmation to log deletion
 

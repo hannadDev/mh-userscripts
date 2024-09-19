@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.1
+// @version      1.2
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -106,10 +106,13 @@
         if (storedData.lastSavedEntryId === logId) {
             const keys = Object.keys(storedData.logs);
 
+            storedData.lastSavedEntryId = -1;
             if (keys.length > 0) {
-                storedData.lastSavedEntryId = keys[keys.length - 1];
-            } else {
-                storedData.lastSavedEntryId = -1;
+                for (let k = 0; k < keys.length; k++) {
+                    if (storedData.lastSavedEntryId < Number.parseInt(keys[i])) {
+                        storedData.lastSavedEntryId = Number.parseInt(keys[i]);
+                    }
+                }
             }
         }
     }
@@ -129,9 +132,11 @@
 
         let addedNewEntries = false;
         for (const entry of entries) {
-            const entryId = entry.dataset.entryId
+            let entryId = entry.dataset.entryId
 
             if (!entryId) return;
+
+            entryId = Number.parseInt(entryId);
 
             if (entry.className.search(/(log_summary)/) !== -1) {
                 if (storedData.logs.hasOwnProperty(entryId)) {
@@ -200,6 +205,27 @@
                 entryInfo.Ftc = Number.parseInt(tdElements[i].nextSibling.innerHTML);
             } else if (tdElements[i].innerHTML.includes("Fail to Attract:")) {
                 entryInfo.Fta = Number.parseInt(tdElements[i].nextSibling.innerHTML);
+            } else if (tdElements[i].innerHTML.includes("Gained:")) {
+                // Left is gold. Right is points
+                if (tdElements[i].classList.contains('leftSide')) {
+                    entryInfo.GoldGained = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                } else {
+                    entryInfo.PointsGained = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                }
+            } else if (tdElements[i].innerHTML.includes("Lost:")) {
+                // Left is gold. Right is points
+                if (tdElements[i].classList.contains('leftSide')) {
+                    entryInfo.GoldLost = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                } else {
+                    entryInfo.PointsLost = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                }
+            } else if (tdElements[i].innerHTML.includes("Total:")) {
+                // Left is gold. Right is points
+                if (tdElements[i].classList.contains('leftSide')) {
+                    entryInfo.GoldTotal = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                } else {
+                    entryInfo.PointsTotal = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                }
             }
         }
 
@@ -273,8 +299,8 @@
         journalLogsTable.id = "journal-logs-table"
         journalLogsTable.classList.add("hd-table");
 
-        const headings = ["#", "Date & Time", "Duration", "Catches", "FTC", "FTA", "#"];
-        const keys = ["", "Timestamp", "Duration", "Catches", "Ftc", "Fta"];
+        const headings = ["#", "Date & Time", "Duration", "Catches", "FTC", "FTA", "Gold", "Points", "#"];
+        const keys = ["", "Timestamp", "Duration", "Catches", "Ftc", "Fta", "GoldTotal", "PointsTotal"];
 
         // Create headings
         for (let i = 0; i < headings.length; ++i) {
@@ -344,7 +370,7 @@
 
                     tdElement.append(link);
                 } else {
-                    tdElement.innerText = storedData.logs[logId][keys[i]];
+                    tdElement.innerText = storedData.logs[logId][keys[i]] ?? '-';
                 }
 
                 tdElement.classList.add("hd-table-td");
@@ -366,12 +392,24 @@
         const pagesCount = Math.ceil(Object.keys(storedData.logs).length / PAGE_SIZE);
 
         const paginationDiv = document.createElement("div");
+        const firstPageLink = document.createElement("a");
+        firstPageLink.innerText = "<< First";
+        firstPageLink.classList.add("hd-mx-2");
+        paginationDiv.appendChild(firstPageLink);
+
         const previousPageLink = document.createElement("a");
         previousPageLink.innerText = "< Prev";
         previousPageLink.classList.add("hd-mx-2");
         paginationDiv.appendChild(previousPageLink);
 
         if (page > 1) {
+            firstPageLink.href = "#";
+
+            firstPageLink.addEventListener("click", function () {
+                showLogs(1, enableDeleteLogs);
+                return false;
+            });
+
             previousPageLink.href = "#";
 
             previousPageLink.addEventListener("click", function () {
@@ -389,7 +427,12 @@
         nextPageLink.innerText = "Next >";
         nextPageLink.classList.add("hd-mx-2");
         paginationDiv.appendChild(nextPageLink);
-        
+
+        const lastPageLink = document.createElement("a");
+        lastPageLink.innerText = "Last >>";
+        lastPageLink.classList.add("hd-mx-2");
+        paginationDiv.appendChild(lastPageLink);
+
         if (page < pagesCount) {
             nextPageLink.href = "#";
             nextPageLink.addEventListener("click", function () {
@@ -397,6 +440,11 @@
                 return false;
             });
 
+            lastPageLink.href = "#";
+            lastPageLink.addEventListener("click", function () {
+                showLogs(pagesCount, enableDeleteLogs);
+                return false;
+            });
         }
 
         journalLogs.appendChild(paginationDiv);
