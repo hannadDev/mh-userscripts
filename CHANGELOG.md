@@ -1,5 +1,15 @@
 __Journal Log Tracker__
 
+v1.3.2
+- Fixed a small issue in calculating of estimate log when overdue
+
+v1.3.1
+- Skip over missed logs after 8 hours and show the next estimated one instead
+
+v1.3.0
+- Correctly parse 0 in rows, add commas to gold and points
+- Support for Mousehunt Improved dark mode
+
 v1.2.2
 - Fixed script to work properly on Journal.php page as well (removed onPageChange and used MutationObserver instead)
 

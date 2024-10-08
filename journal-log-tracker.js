@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.3.0
+// @version      1.3.2
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -300,7 +300,9 @@
         let nextLogDateString = "N/A";
         if (storedData.lastSavedEntryId !== undefined && storedData.logs[storedData.lastSavedEntryId] !== undefined) {
             const logDate = new Date(storedData.logs[storedData.lastSavedEntryId].Timestamp);
-            logDate.setHours(logDate.getHours() + 36);
+            do {
+                logDate.setHours(logDate.getHours() + 36);
+            } while (Date.now() - logDate.getTime() > 4 * (1000 * 60 * 60));
 
             nextLogDateString = `${logDate.toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} - (${getNextLogTimer()})`;
         }
@@ -557,7 +559,8 @@
 
             const nextLogTimestamp = lastLogDate.setHours(lastLogDate.getHours() + 36);
             const timestampDifference = Math.abs(nextLogTimestamp - Date.now());
-            const hasPassed = nextLogTimestamp < Date.now();
+            let hasPassed = nextLogTimestamp < Date.now();
+            let logsMissed = 0;
 
             let hours = Math.floor(timestampDifference / 1000 / 60 / 60);
             let minutes = Math.round((timestampDifference - (hours * 1000 * 60 * 60)) / 1000 / 60);
@@ -570,6 +573,16 @@
             timerString = "";
 
             if (hours > 0) {
+                if (hasPassed && hours >= 8) {
+                    logsMissed = Math.floor(hours / 36) + 1;
+                    hours = Math.abs(hours - 36 * logsMissed);
+
+                    if(minutes > 0) {
+                        hours--;
+                        minutes = 60 - minutes;
+                    }
+                }
+
                 timerString = `${hours}h`;
             }
 
@@ -577,7 +590,11 @@
                 timerString += `${hours > 0 ? " " : ""}${minutes}m`;
             }
 
-            if (hasPassed) {
+            if (logsMissed > 0) {
+                timerString = `~${timerString}`;
+            }
+
+            if (hasPassed && logsMissed === 0) {
                 timerString += " ago";
             }
 
