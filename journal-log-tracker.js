@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.2.2
+// @version      1.3.0
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
 // @match        https://www.mousehuntgame.com/*
 // @icon         https://www.mousehuntgame.com/images/ui/journal/themes/classic_thumb.gif
-// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.7/scripts/utils.js
+// @require      https://cdn.jsdelivr.net/npm/mh-assets@1.0.8/scripts/utils.js
 // @require      https://cdn.jsdelivr.net/npm/mousehunt-utils@1.10.5/mousehunt-utils.js
 // @license      MIT
 // ==/UserScript==
@@ -24,8 +24,8 @@
     //#endregion
 
     //#region Loading external assets
-    const mainStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.7/stylesheets/main.css";
-    const scriptSpecificStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.7/stylesheets/journal-log-tracker.css";
+    const mainStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.8/stylesheets/main.css";
+    const scriptSpecificStylesheetUrl = "https://cdn.jsdelivr.net/npm/mh-assets@1.0.8/stylesheets/journal-log-tracker.css";
 
     hd_utils.addStyleElement(mainStylesheetUrl);
     hd_utils.addStyleElement(scriptSpecificStylesheetUrl);
