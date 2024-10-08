@@ -387,7 +387,15 @@
 
                     tdElement.append(link);
                 } else {
-                    tdElement.innerText = storedData.logs[logId][keys[i]] ?? '-';
+                    if (storedData.logs[logId][keys[i]] !== undefined) {
+                        tdElement.innerText = storedData.logs[logId][keys[i]];
+
+                        if ('GoldTotal' === keys[i] || 'PointsTotal' === keys[i]) {
+                            tdElement.innerText = Number.parseInt(tdElement.innerText).toLocaleString();
+                        }
+                    } else {
+                        tdElement.innerText = '-';
+                    }
                 }
 
                 tdElement.classList.add("hd-table-td");
