@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.3.2
+// @version      1.3.3
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -225,23 +225,35 @@
             } else if (tdElements[i].innerHTML.includes("Gained:")) {
                 // Left is gold. Right is points
                 if (tdElements[i].classList.contains('leftSide')) {
-                    entryInfo.GoldGained = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    if (tdElements[i].nextSibling) {
+                        entryInfo.GoldGained = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    }
                 } else {
-                    entryInfo.PointsGained = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    if (tdElements[i].nextSibling) {
+                        entryInfo.PointsGained = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    }
                 }
             } else if (tdElements[i].innerHTML.includes("Lost:")) {
                 // Left is gold. Right is points
                 if (tdElements[i].classList.contains('leftSide')) {
-                    entryInfo.GoldLost = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    if (tdElements[i].nextSibling) {
+                        entryInfo.GoldLost = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    }
                 } else {
-                    entryInfo.PointsLost = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    if (tdElements[i].nextSibling) {
+                        entryInfo.PointsLost = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    }
                 }
             } else if (tdElements[i].innerHTML.includes("Total:")) {
                 // Left is gold. Right is points
                 if (tdElements[i].classList.contains('leftSide')) {
-                    entryInfo.GoldTotal = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    if (tdElements[i].nextSibling) {
+                        entryInfo.GoldTotal = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    }
                 } else {
-                    entryInfo.PointsTotal = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    if (tdElements[i].nextSibling) {
+                        entryInfo.PointsTotal = Number.parseInt(tdElements[i].nextSibling.innerHTML.replaceAll(',', ''));
+                    }
                 }
             }
         }
@@ -577,7 +589,7 @@
                     logsMissed = Math.floor(hours / 36) + 1;
                     hours = Math.abs(hours - 36 * logsMissed);
 
-                    if(minutes > 0) {
+                    if (minutes > 0) {
                         hours--;
                         minutes = 60 - minutes;
                     }

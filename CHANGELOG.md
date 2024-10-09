@@ -1,5 +1,8 @@
 __Journal Log Tracker__
 
+v1.3.3
+- Minor fix to accomodate for the added fields from mlial script
+
 v1.3.2
 - Fixed a small issue in calculating of estimate log when overdue
 
