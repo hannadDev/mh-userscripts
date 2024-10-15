@@ -1,5 +1,8 @@
 __Journal Log Tracker__
 
+v1.4.0
+- Added export/import feature to be able to grab logs from other devices
+
 v1.3.3
 - Minor fix to accomodate for the added fields from mlial script
 

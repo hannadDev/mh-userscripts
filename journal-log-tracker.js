@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.3.3
+// @version      1.4.0
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -266,6 +266,71 @@
     }
     // #endregion
 
+    // #region Export/Import Methods
+    function exportData() {
+        let filename = `${user.user_id}_${Date.now()}.json`;
+        let contentType = "application/json;charset=utf-8;";
+
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            var blob = new Blob([decodeURIComponent(encodeURI(JSON.stringify(storedData)))], { type: contentType });
+            navigator.msSaveOrOpenBlob(blob, filename);
+        } else {
+            var a = document.createElement('a');
+            a.download = filename;
+            a.href = 'data:' + contentType + ',' + encodeURIComponent(JSON.stringify(storedData));
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    }
+
+    function importData() {
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = _ => {
+            let files = Array.from(input.files);
+
+            if (files.length > 0 && files[0].type === "application/json") {
+                let fr = new FileReader();
+
+                fr.onload = function () {
+                    const importedData = JSON.parse(this.result);
+                    filterAndSaveImportedData(importedData);
+                }
+
+                fr.readAsText(files[0]);
+            } else {
+                console.log("Invalid file imported");
+            }
+        };
+        input.click();
+    }
+
+    function filterAndSaveImportedData(importedData) {
+        let importedLogCount = 0;
+        for (const key in importedData.logs) {
+            if (!storedData.logs.hasOwnProperty(key)) {
+                storedData.logs[key] = importedData.logs[key];
+
+                if (Number.parseInt(storedData.lastSavedEntryId) < Number.parseInt(key)) {
+                    storedData.lastSavedEntryId = Number.parseInt(key);
+                }
+
+                importedLogCount++;
+            }
+        }
+
+        console.log(`Imported ${importedLogCount} logs`);
+
+        if (importedLogCount > 0) {
+            setData(storedData);
+            showLogs();
+            showButton();
+        }
+    }
+    // #endregion
+
     // #region UI
     function showButton() {
         if (!hd_utils.mh.isOwnJournal()) {
@@ -501,6 +566,26 @@
         });
 
         journalLogs.appendChild(manualFetchLink);
+
+        // Export link. Remove to other tab later
+        journalLogs.appendChild(document.createElement("br"));
+        journalLogs.appendChild(document.createElement("br"));
+        const exportLink = document.createElement("a");
+        exportLink.innerText = "Export";
+        exportLink.href = "#";
+        exportLink.classList.add("hd-button");
+        exportLink.addEventListener("click", exportData);
+
+        journalLogs.appendChild(exportLink);
+
+        // Import link. Remove to other tab later
+        const importLink = document.createElement("a");
+        importLink.innerText = "Import";
+        importLink.href = "#";
+        importLink.classList.add("hd-button");
+        importLink.addEventListener("click", importData);
+
+        journalLogs.appendChild(importLink);
 
         // Toggle Log Deletion. Remove to other tab later
         journalLogs.appendChild(document.createElement("br"));
