@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Journal Log Tracker
-// @version      1.4.0
+// @version      1.4.1
 // @description  Tracks when your journal log is going to show up next and shows a button to access your last journal log
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -185,19 +185,22 @@
     function extractInfoFromEntry(entry) {
         const entryInfo = {};
 
-        const splitStringDate = entry.querySelector(".journaldate").innerHTML.split("-")[0].trim().split(" ");
+        const dateString = entry.querySelector(".journaldate").innerHTML.split("-")[0].trim().replaceAll(" ", "");
+        const hoursString = dateString.split(':')[0];
+        const minutesString = dateString.split(':')[1].replace("am", "").replace("pm", "");
+        const timePeriodString = dateString.split(':')[1].includes('am') ? 'am' : 'pm';
 
         try {
             const date = new Date();
             date.setMilliseconds(0);
             date.setSeconds(0);
 
-            date.setHours(splitStringDate[0].split(":")[0]);
-            date.setMinutes(splitStringDate[0].split(":")[1]);
+            date.setHours(hoursString);
+            date.setMinutes(minutesString);
 
-            if (date.getHours() !== 12 && splitStringDate[1] === "pm") {
+            if (date.getHours() !== 12 && timePeriodString === "pm") {
                 date.setHours(date.getHours() + 12);
-            } else if (date.getHours() === 12 && splitStringDate[1] === "am") {
+            } else if (date.getHours() === 12 && timePeriodString === "am") {
                 date.setHours(date.getHours() - 12);
             }
 

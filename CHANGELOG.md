@@ -1,5 +1,8 @@
 __Journal Log Tracker__
 
+v1.4.1
+- Fixed an issue grabbing the date due to a removed space from the date string in the journal log
+
 v1.4.0
 - Added export/import feature to be able to grab logs from other devices
 
