@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Golem Visit Stats
-// @version      2.0.5
+// @version      2.0.6
 // @description  Shows golem visit numbers without having to bell your golem or have an idle one. Also adds a small tooltip in the aura to inform you of the hours left until max aura and the number of golems / hats needed for it.
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -336,7 +336,7 @@
                 hours = 12 + parseInt(hours);
             }
 
-            const parsedDate = new Date(`${currentAuraDateSplit[2]}/${hd_statics.monthMap.get(currentAuraDateSplit[0])}/${currentAuraDateSplit[1].replace(',', '')} ${hours}:${minutes} UTC`);
+            const parsedDate = new Date(`${currentAuraDateSplit[2]}/${hd_statics.monthMap.get(currentAuraDateSplit[0])}/${currentAuraDateSplit[1].replace(',', '')} ${hours}:${minutes}`);
             parsedDate.setMinutes(parsedDate.getMinutes() + timezoneOffset);
 
             const parsedDateTimestamp = parsedDate.getTime();
@@ -358,7 +358,16 @@
             endAuraTextSplit = endAuraTextSplit.replace(')', '');
             let endAuraDateTextSplit = endAuraTextSplit.trim().split(' ');
 
-            const parsedEndDate = new Date(`${endAuraDateTextSplit[2]}/${hd_statics.monthMap.get(endAuraDateTextSplit[0])}/${endAuraDateTextSplit[1]} ${endAuraDateTextSplit[3]} ${endAuraDateTextSplit[4]}`).getTime();
+            const endTimeSplit = currentAuraDateSplit[4].split(":");
+            let endHours = endTimeSplit[0];
+            const endMinutes = endTimeSplit[1].slice(0, endTimeSplit[1].length - 2);
+            let endPeriod = endTimeSplit[1].slice(endTimeSplit[1].length - 2, endTimeSplit[1].length);
+
+            if (endPeriod == "pm" && endHours != "12") {
+                endHours = 12 + parseInt(endHours);
+            }
+
+            const parsedEndDate = new Date(`${endAuraDateTextSplit[2]}/${hd_statics.monthMap.get(endAuraDateTextSplit[0])}/${endAuraDateTextSplit[1].replace(',', '')} ${endHours}:${endMinutes}`).getTime();
 
             if (isDebug) {
                 console.log(`EndAuraTextSplit= ${endAuraTextSplit}`);
