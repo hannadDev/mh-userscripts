@@ -70,6 +70,12 @@ v0.1
 
 __Golem Visit Stats__
 
+v2.0.5
+- Fixed issue related to scraping area name for hats/scarves
+
+v2.0.4
+- Fixed small issue when previously refactoring
+
 v2.0.3
 - Extracted some extra code to be added to external libraries
 
