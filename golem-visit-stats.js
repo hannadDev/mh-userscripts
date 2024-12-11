@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Golem Visit Stats
-// @version      2.0.7
+// @version      2.0.8
 // @description  Shows golem visit numbers without having to bell your golem or have an idle one. Also adds a small tooltip in the aura to inform you of the hours left until max aura and the number of golems / hats needed for it.
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -84,6 +84,8 @@
 
     // #region Golem Stats Methods
     function getGolemStats(year = data.eventYear) {
+        cleanUpEntries();
+        
         let golemStats = {};
         let isCached = false;
 
@@ -508,6 +510,45 @@
         }
     }
 
+    function cleanUpEntries() {
+        if(storedData.CleanedUpEntries20241211) {
+            return;
+        }
+
+        let savedEntries = {};
+        if (storedData['2024'] != undefined && storedData['2024']["logEntries"] != undefined) {
+            savedEntries = storedData['2024']["logEntries"];
+        }
+
+        for (const entryId in savedEntries) {
+            if (savedEntries[entryId].LocationName.indexOf('the ') == 0) {
+                savedEntries[entryId].LocationName = savedEntries[entryId].LocationName.replace('the ', '');
+            }
+        }
+
+        let savedScrapedStats = {};
+        if (storedData['2024'] != undefined && storedData['2024']["scrapedStats"] != undefined) {
+            savedScrapedStats = storedData['2024']["scrapedStats"];
+        }
+
+        for (const locationName in savedScrapedStats) {
+            if (locationName.indexOf('the ') == 0) {
+                const trimmedLocationName = locationName.replace('the ', '');
+
+                if (!savedScrapedStats[trimmedLocationName]) {
+                    savedScrapedStats[trimmedLocationName] = { "Hats": 0, "Scarves": 0 };
+                }
+
+                savedScrapedStats[trimmedLocationName]["Hats"] += savedScrapedStats[locationName]["Hats"];
+                savedScrapedStats[trimmedLocationName]["Scarves"] += savedScrapedStats[locationName]["Scarves"];
+                delete savedScrapedStats[locationName];
+            }
+        }
+
+        storedData.CleanedUpEntries20241211 = true;
+        setYearLogs(savedEntries, savedScrapedStats, data.eventYear);
+    }
+
     function extractInfoFromEntry(entry) {
         const info = {
             LocationName: "",
@@ -522,7 +563,7 @@
         const split1 = journalText.split("It lumbered towards ");
         if (split1[1] === undefined) return null;
 
-        split1[1].replace('the ', '');
+        split1[1] = split1[1].replace('the ', '');
 
         const split2 = split1[1].split(" and will be back");
         info.LocationName = split2[0];

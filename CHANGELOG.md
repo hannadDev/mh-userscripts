@@ -70,6 +70,9 @@ v0.1
 
 __Golem Visit Stats__
 
+v2.0.8
+- Even more fixes to scraping area names for hats/scarves (send halp pls)
+
 v2.0.7
 - More fixes to scraping area name for hats/scarves
 
