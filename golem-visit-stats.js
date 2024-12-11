@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Golem Visit Stats
-// @version      2.0.6
+// @version      2.0.7
 // @description  Shows golem visit numbers without having to bell your golem or have an idle one. Also adds a small tooltip in the aura to inform you of the hours left until max aura and the number of golems / hats needed for it.
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -519,8 +519,10 @@
         info.Hat = journalText.includes("Hat");
         info.Scarf = journalText.includes("Scarf");
 
-        const split1 = journalText.split("It lumbered towards the ");
+        const split1 = journalText.split("It lumbered towards ");
         if (split1[1] === undefined) return null;
+
+        split1[1].replace('the ', '');
 
         const split2 = split1[1].split(" and will be back");
         info.LocationName = split2[0];
