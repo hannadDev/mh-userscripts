@@ -70,6 +70,9 @@ v0.1
 
 __Golem Visit Stats__
 
+v2.1.0
+- Added buttons to show previous years' data cached
+
 v2.0.9
 - Fixed an issue in calculating hours until max aura
 
