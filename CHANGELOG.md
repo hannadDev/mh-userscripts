@@ -70,6 +70,9 @@ v0.1
 
 __Golem Visit Stats__
 
+v2.0.9
+- Fixed an issue in calculating hours until max aura
+
 v2.0.8
 - Even more fixes to scraping area names for hats/scarves (send halp pls)
 

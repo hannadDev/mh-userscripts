@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MH - Golem Visit Stats
-// @version      2.0.8
+// @version      2.0.9
 // @description  Shows golem visit numbers without having to bell your golem or have an idle one. Also adds a small tooltip in the aura to inform you of the hours left until max aura and the number of golems / hats needed for it.
 // @author       hannadDev
 // @namespace    https://greasyfork.org/en/users/1238393-hannaddev
@@ -311,15 +311,6 @@
         if (document.querySelector(".MiniEventFestiveAura") != null && document.querySelector(".MiniEventFestiveAura").classList.contains("active")) {
             const festiveAuraTooltipElement = document.querySelector(".MiniEventFestiveAura .trapImageView-tooltip-trapAura");
 
-            // #region Get timezone offset
-            const timezoneOffsetDate = new Date();
-            const timezoneOffset = timezoneOffsetDate.getTimezoneOffset();
-
-            if (isDebug) {
-                console.log(`timezoneOffset= ${timezoneOffset}`);
-            }
-            // #endregion
-
             // #region Current Aura
             const currentAuraTextSplit = festiveAuraTooltipElement.innerText.split("expires on:");
             const currentAuraDateSplit = currentAuraTextSplit[currentAuraTextSplit.length - 1].trim().split(' ');
@@ -339,7 +330,6 @@
             }
 
             const parsedDate = new Date(`${currentAuraDateSplit[2]}/${hd_statics.monthMap.get(currentAuraDateSplit[0])}/${currentAuraDateSplit[1].replace(',', '')} ${hours}:${minutes}`);
-            parsedDate.setMinutes(parsedDate.getMinutes() + timezoneOffset);
 
             const parsedDateTimestamp = parsedDate.getTime();
 
@@ -360,7 +350,7 @@
             endAuraTextSplit = endAuraTextSplit.replace(')', '');
             let endAuraDateTextSplit = endAuraTextSplit.trim().split(' ');
 
-            const endTimeSplit = currentAuraDateSplit[4].split(":");
+            const endTimeSplit = endAuraDateTextSplit[4].split(":");
             let endHours = endTimeSplit[0];
             const endMinutes = endTimeSplit[1].slice(0, endTimeSplit[1].length - 2);
             let endPeriod = endTimeSplit[1].slice(endTimeSplit[1].length - 2, endTimeSplit[1].length);
